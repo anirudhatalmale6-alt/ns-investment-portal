@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NS Investment Portal</title>
+<title>Nidnoi Solutions Investment Portal</title>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -85,7 +85,7 @@ tr:hover td{background:#fafbfc}
 <body>
 
 <div class="header">
-  <h1>NS Investment Portal</h1>
+  <h1>Nidnoi Solutions<br>Investment Portal</h1>
   <p>Sustainability for the people and the planet</p>
 </div>
 
@@ -142,8 +142,6 @@ tr:hover td{background:#fafbfc}
   <div id="panel-banking" class="panel">
     <h2 class="section-title">Banking Information</h2>
     <div class="form-grid">
-      <div class="form-group"><label>Account Name *</label><input type="text" id="bk-name" placeholder="Account holder name"></div>
-      <div class="form-group"><label>Account #</label><input type="text" id="bk-acct" placeholder="Account number"></div>
       <div class="form-group"><label>Bank Name *</label><input type="text" id="bk-bank" placeholder="Bank name"></div>
       <div class="form-group"><label>Bank Account Name</label><input type="text" id="bk-baname" placeholder="Name on bank account"></div>
       <div class="form-group"><label>Bank Account Number</label><input type="text" id="bk-banum" placeholder="Bank account number"></div>
@@ -169,10 +167,6 @@ tr:hover td{background:#fafbfc}
   <!-- INVESTMENT -->
   <div id="panel-investment" class="panel">
     <h2 class="section-title">Investment Selection</h2>
-    <div class="form-grid" style="margin-bottom:22px">
-      <div class="form-group"><label>Account #</label><input type="text" id="inv-acct" placeholder="Account number"></div>
-      <div class="form-group"><label>Account Name</label><input type="text" id="inv-name" placeholder="Account holder name"></div>
-    </div>
     <div id="inv-entries"></div>
     <button class="add-btn" onclick="addInvCard()">+ Add Investment</button>
     <div class="btn-row">
@@ -335,11 +329,11 @@ function saveContact() {
 
 // ── Banking Save ──
 function saveBanking() {
-  if (!requireFields(['bk-name','bk-bank'])) { toast('Please fill in all required fields.','error'); return; }
+  if (!requireFields(['bk-bank'])) { toast('Please fill in all required fields.','error'); return; }
   var btn = document.getElementById('btn-bk');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
   var data = {
-    accountName: gv('bk-name'), accountNumber: gv('bk-acct'), bankName: gv('bk-bank'),
+    bankName: gv('bk-bank'),
     bankAccountName: gv('bk-baname'), bankAccountNumber: gv('bk-banum'), routingNumber: gv('bk-route'),
     iban: gv('bk-iban'), swiftCode: gv('bk-swift'), bankAddress: gv('bk-addr'),
     bankAddressLine2: gv('bk-addr2'), bankCity: gv('bk-city'), bankProvinceState: gv('bk-prov'),
@@ -373,11 +367,7 @@ function addInvCard() {
     '<div class="form-group"><label>Duration</label><select id="inv-dur-'+n+'" onchange="onDur('+n+')"><option value="">-- Select Duration --</option><option>Short-Term</option><option>Intermediate</option><option>Long-Term</option></select></div>' +
     '<div class="form-group"><label>Holding Period</label><select id="inv-hp-'+n+'" disabled><option value="">-- Select Duration first --</option></select></div>' +
     '<div class="form-group"><label>Committed Capital</label><input type="text" id="inv-cap-'+n+'" placeholder="$0.00"></div>' +
-    '<div class="form-group"><label>Deposit Interval</label><input type="text" id="inv-int-'+n+'" placeholder="e.g. Monthly"></div>' +
     '<div class="form-group"><label>Initial Investment</label><input type="text" id="inv-init-'+n+'" placeholder="$0.00"></div>' +
-    '<div class="form-group"><label>Capital Call Date</label><input type="date" id="inv-ccd-'+n+'"></div>' +
-    '<div class="form-group"><label>Funding Date</label><input type="date" id="inv-fd-'+n+'"></div>' +
-    '<div class="form-group"><label>Maturity Date</label><input type="date" id="inv-md-'+n+'"></div>' +
     '</div>';
   document.getElementById('inv-entries').appendChild(c);
 }
@@ -423,18 +413,14 @@ function saveInvestments() {
   if (!cards.length) { toast('Add at least one investment.','error'); return; }
   var btn = document.getElementById('btn-inv');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
-  var acct = gv('inv-acct');
-  var name = gv('inv-name');
   var promises = [];
   cards.forEach(function(card) {
     var n = card.id.replace('inv-card-','');
     var data = {
-      accountNumber: acct, accountName: name,
       assetClass: gv('inv-ac-'+n), classSelection: gv('inv-cs-'+n),
       duration: gv('inv-dur-'+n), holdingPeriod: gv('inv-hp-'+n),
-      committedCapital: gv('inv-cap-'+n), depositInterval: gv('inv-int-'+n),
-      initialInvestment: gv('inv-init-'+n), capitalCallDate: gv('inv-ccd-'+n),
-      fundingDate: gv('inv-fd-'+n), maturityDate: gv('inv-md-'+n),
+      committedCapital: gv('inv-cap-'+n),
+      initialInvestment: gv('inv-init-'+n),
       savedAt: new Date().toISOString()
     };
     promises.push(dbAdd('investments', data));
@@ -484,16 +470,16 @@ function renderContactsTable(rows) {
 function renderBankingTable(rows) {
   var el = document.getElementById('rec-banking');
   if (!rows.length) { el.innerHTML = '<div class="empty-state">No banking records yet. Use the Banking Info tab to add one.</div>'; return; }
-  var cols = ['Account Name','Account #','Bank Name','Bank Account Name','Bank Account Number','Routing Number','IBAN','SWIFT Code/BIC','Bank Address','Address Line 2','City','Province/State','Postcode','Country','Bank Phone Number','Account Manager','Email Address'];
-  var keys = ['accountName','accountNumber','bankName','bankAccountName','bankAccountNumber','routingNumber','iban','swiftCode','bankAddress','bankAddressLine2','bankCity','bankProvinceState','bankPostcode','bankCountry','bankPhone','acctManagerName','acctManagerEmail'];
+  var cols = ['Bank Name','Bank Account Name','Bank Account Number','Routing Number','IBAN','SWIFT Code/BIC','Bank Address','Address Line 2','City','Province/State','Postcode','Country','Bank Phone Number','Account Manager','Email Address'];
+  var keys = ['bankName','bankAccountName','bankAccountNumber','routingNumber','iban','swiftCode','bankAddress','bankAddressLine2','bankCity','bankProvinceState','bankPostcode','bankCountry','bankPhone','acctManagerName','acctManagerEmail'];
   el.innerHTML = '<div class="record-count">'+rows.length+' record(s)</div>' + buildTable(rows, cols, keys, 'banking');
 }
 
 function renderInvestmentsTable(rows) {
   var el = document.getElementById('rec-investments');
   if (!rows.length) { el.innerHTML = '<div class="empty-state">No investment records yet. Use the Investment Selection tab to add one.</div>'; return; }
-  var cols = ['Account #','Account Name','Asset Class','Class Selection','Duration','Holding Period','Committed Capital','Deposit Interval','Initial Investment','Capital Call Date','Funding Date','Maturity Date'];
-  var keys = ['accountNumber','accountName','assetClass','classSelection','duration','holdingPeriod','committedCapital','depositInterval','initialInvestment','capitalCallDate','fundingDate','maturityDate'];
+  var cols = ['Asset Class','Class Selection','Duration','Holding Period','Committed Capital','Initial Investment'];
+  var keys = ['assetClass','classSelection','duration','holdingPeriod','committedCapital','initialInvestment'];
   el.innerHTML = '<div class="record-count">'+rows.length+' record(s)</div>' + buildTable(rows, cols, keys, 'investments');
 }
 
@@ -535,22 +521,22 @@ function exportExcel() {
     XLSX.utils.book_append_sheet(wb, ws1, 'Contact DB');
 
     // Banking DB
-    var bkHeaders = ['Account Name','Account #','Bank Name','Bank Account Name','Bank Account Number','Routing Number','IBAN','SWIFT Code/BIC','Bank Address','Address Line 2','City','Province/State','Postcode','Country','Bank Phone Number','Account Manager','Email Address'];
-    var bkKeys = ['accountName','accountNumber','bankName','bankAccountName','bankAccountNumber','routingNumber','iban','swiftCode','bankAddress','bankAddressLine2','bankCity','bankProvinceState','bankPostcode','bankCountry','bankPhone','acctManagerName','acctManagerEmail'];
+    var bkHeaders = ['Bank Name','Bank Account Name','Bank Account Number','Routing Number','IBAN','SWIFT Code/BIC','Bank Address','Address Line 2','City','Province/State','Postcode','Country','Bank Phone Number','Account Manager','Email Address'];
+    var bkKeys = ['bankName','bankAccountName','bankAccountNumber','routingNumber','iban','swiftCode','bankAddress','bankAddressLine2','bankCity','bankProvinceState','bankPostcode','bankCountry','bankPhone','acctManagerName','acctManagerEmail'];
     var bkData = [bkHeaders];
     results[1].forEach(function(r) { var row = []; bkKeys.forEach(function(k){ row.push(r[k]||''); }); bkData.push(row); });
     var ws2 = XLSX.utils.aoa_to_sheet(bkData);
     XLSX.utils.book_append_sheet(wb, ws2, 'Banking DB');
 
     // LP Selection
-    var invHeaders = ['Account #','Account Name','Asset Class','Class Selection','Duration','Holding Period','Committed Capital','Deposit Interval','Initial Investment','Capital Call Date','Funding Date','Maturity Date'];
-    var invKeys = ['accountNumber','accountName','assetClass','classSelection','duration','holdingPeriod','committedCapital','depositInterval','initialInvestment','capitalCallDate','fundingDate','maturityDate'];
+    var invHeaders = ['Asset Class','Class Selection','Duration','Holding Period','Committed Capital','Initial Investment'];
+    var invKeys = ['assetClass','classSelection','duration','holdingPeriod','committedCapital','initialInvestment'];
     var invData = [invHeaders];
     results[2].forEach(function(r) { var row = []; invKeys.forEach(function(k){ row.push(r[k]||''); }); invData.push(row); });
     var ws3 = XLSX.utils.aoa_to_sheet(invData);
     XLSX.utils.book_append_sheet(wb, ws3, 'LP Selection');
 
-    XLSX.writeFile(wb, 'NS_Investment_Data.xlsx');
+    XLSX.writeFile(wb, 'Nidnoi_Solutions_Investment_Data.xlsx');
     toast('Excel file downloaded successfully.');
   });
 }
