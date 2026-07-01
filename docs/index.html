@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NS Investment Portal</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;background:#f0f2f5;color:#1a1a2e;line-height:1.6}
+.header{background:linear-gradient(135deg,#0a1628 0%,#1a2a4a 100%);color:#fff;padding:32px 20px;text-align:center;border-bottom:3px solid #c9a84c;position:relative}
+.header h1{font-size:26px;font-weight:300;letter-spacing:4px;text-transform:uppercase;margin-bottom:6px}
+.header p{font-size:13px;color:#c9a84c;letter-spacing:1.5px;font-style:italic}
+.container{max-width:960px;margin:0 auto;padding:20px}
+.tabs{display:flex;gap:0;background:#fff;border-radius:10px 10px 0 0;overflow:hidden;border-bottom:2px solid #e0e0e0}
+.tab{flex:1;padding:14px 8px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;color:#888;border:none;background:transparent;transition:all .3s;letter-spacing:.5px;text-transform:uppercase;position:relative}
+.tab:hover{color:#1a2a4a;background:#f8f9fa}
+.tab.active{color:#1a2a4a;background:#fff}
+.tab.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:3px;background:#c9a84c;z-index:1}
+.panel{display:none;background:#fff;padding:30px;border-radius:0 0 10px 10px;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.panel.active{display:block}
+.section-title{font-size:17px;font-weight:600;color:#1a2a4a;margin-bottom:22px;padding-bottom:12px;border-bottom:2px solid #f0f2f5;text-transform:uppercase;letter-spacing:1.5px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.form-group{display:flex;flex-direction:column}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:11px;font-weight:700;color:#666;margin-bottom:5px;text-transform:uppercase;letter-spacing:.7px}
+.form-group input,.form-group select{padding:10px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:14px;color:#333;background:#fafbfc;transition:border-color .2s,box-shadow .2s;font-family:inherit}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:#c9a84c;box-shadow:0 0 0 3px rgba(201,168,76,.15);background:#fff}
+.form-group input.invalid,.form-group select.invalid{border-color:#c0392b;box-shadow:0 0 0 3px rgba(192,57,43,.1)}
+.form-group select{cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%23999'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.form-group input::placeholder{color:#bbb}
+.subsection{margin-top:30px;padding-top:22px;border-top:1px solid #eee}
+.subsection-label{font-size:12px;font-weight:700;color:#999;margin-bottom:16px;text-transform:uppercase;letter-spacing:1.2px}
+.inv-card{background:#fafbfc;border:1.5px solid #eee;border-radius:10px;padding:22px;margin-bottom:16px;transition:border-color .2s}
+.inv-card:hover{border-color:#d5d5d5}
+.inv-header{display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:14px;font-weight:600;color:#1a2a4a}
+.inv-num{background:linear-gradient(135deg,#c9a84c,#b8943e);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.remove-btn{margin-left:auto;background:none;border:none;color:#c0392b;cursor:pointer;font-size:12px;padding:4px 10px;border-radius:4px;font-weight:500;transition:background .2s}
+.remove-btn:hover{background:#ffeaea}
+.btn-row{display:flex;gap:12px;margin-top:26px;justify-content:flex-end}
+.btn{padding:12px 34px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.7px;transition:all .2s;text-transform:uppercase;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,#1a2a4a,#0a1628);color:#fff}
+.btn-primary:hover{box-shadow:0 6px 18px rgba(26,42,74,.3);transform:translateY(-1px)}
+.btn-secondary{background:#f0f2f5;color:#666}
+.btn-secondary:hover{background:#e2e6ea}
+.btn-gold{background:linear-gradient(135deg,#c9a84c,#b8943e);color:#fff}
+.btn-gold:hover{box-shadow:0 6px 18px rgba(201,168,76,.35);transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+.add-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:2px dashed #ccc;border-radius:10px;background:transparent;color:#999;cursor:pointer;font-size:14px;font-weight:500;transition:all .2s;width:100%;margin-bottom:18px;font-family:inherit}
+.add-btn:hover{border-color:#c9a84c;color:#c9a84c}
+.toast{position:fixed;top:20px;right:20px;padding:14px 26px;border-radius:8px;color:#fff;font-weight:600;font-size:14px;z-index:9999;transform:translateX(140%);transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:0 6px 24px rgba(0,0,0,.18);max-width:380px}
+.toast.show{transform:translateX(0)}
+.toast.success{background:#27ae60}
+.toast.error{background:#c0392b}
+.toast.info{background:#2980b9}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.records-tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #eee}
+.rec-tab{padding:10px 20px;cursor:pointer;font-size:12px;font-weight:700;color:#999;border:none;background:transparent;text-transform:uppercase;letter-spacing:.5px;position:relative;transition:color .2s;font-family:inherit}
+.rec-tab:hover{color:#1a2a4a}
+.rec-tab.active{color:#c9a84c}
+.rec-tab.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:#c9a84c}
+.tbl-wrap{overflow-x:auto;margin-bottom:20px;border-radius:8px;border:1px solid #eee}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:#1a2a4a;color:#fff}
+th{padding:10px 12px;text-align:left;font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.5px;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #f0f2f5;color:#444;white-space:nowrap}
+tr:hover td{background:#fafbfc}
+.del-row{background:none;border:none;color:#c0392b;cursor:pointer;font-size:18px;padding:2px 8px;border-radius:4px;line-height:1}
+.del-row:hover{background:#ffeaea}
+.empty-state{text-align:center;padding:50px 20px;color:#bbb;font-size:15px}
+.export-row{display:flex;gap:12px;margin-bottom:20px;justify-content:flex-end}
+.record-count{font-size:12px;color:#999;margin-bottom:10px}
+@media(max-width:700px){
+  .form-grid{grid-template-columns:1fr}
+  .tabs{flex-wrap:wrap}
+  .tab{font-size:11px;padding:12px 6px;flex:1 1 45%}
+  .panel{padding:20px 16px}
+  .header h1{font-size:20px;letter-spacing:2px}
+  .btn{padding:10px 20px;font-size:12px}
+  .records-tabs{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>NS Investment Portal</h1>
+  <p>Sustainability for the people and the planet</p>
+</div>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('contact')">Contact Info</button>
+    <button class="tab" onclick="switchTab('banking')">Banking Info</button>
+    <button class="tab" onclick="switchTab('investment')">Investment Selection</button>
+    <button class="tab" onclick="switchTab('records')">View Records</button>
+  </div>
+
+  <!-- CONTACT -->
+  <div id="panel-contact" class="panel active">
+    <h2 class="section-title">Contact Information</h2>
+    <div class="form-grid">
+      <div class="form-group"><label>Account Opening Date *</label><input type="date" id="ct-date"></div>
+      <div class="form-group"><label>Investor Type *</label>
+        <select id="ct-type"><option value="">-- Select --</option><option>Corporation</option><option>Family Office</option><option>Group</option><option>Individual</option></select>
+      </div>
+      <div class="form-group"><label>Company Name</label><input type="text" id="ct-company" placeholder="Enter company name"></div>
+      <div class="form-group"><label>Account Holder Name *</label><input type="text" id="ct-holder" placeholder="Full name"></div>
+      <div class="form-group"><label>Phone Number</label><input type="tel" id="ct-phone" placeholder="+1 234 567 8901"></div>
+      <div class="form-group"><label>Email Address *</label><input type="email" id="ct-email" placeholder="email@example.com"></div>
+      <div class="form-group full"><label>Mailing Address</label><input type="text" id="ct-addr1" placeholder="Street address"></div>
+      <div class="form-group full"><label>Address Line 2</label><input type="text" id="ct-addr2" placeholder="Apt, suite, unit, etc."></div>
+      <div class="form-group"><label>City / Town</label><input type="text" id="ct-city" placeholder="City"></div>
+      <div class="form-group"><label>Province / State</label><input type="text" id="ct-prov" placeholder="Province or state"></div>
+      <div class="form-group"><label>Postcode</label><input type="text" id="ct-post" placeholder="Postal code"></div>
+      <div class="form-group"><label>Country</label><input type="text" id="ct-country" placeholder="Country"></div>
+    </div>
+    <div class="subsection">
+      <div class="subsection-label">Second Contact</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Name</label><input type="text" id="ct-c2name" placeholder="Full name"></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" id="ct-c2phone" placeholder="+1 234 567 8901"></div>
+        <div class="form-group"><label>Email Address</label><input type="email" id="ct-c2email" placeholder="email@example.com"></div>
+      </div>
+    </div>
+    <div class="subsection">
+      <div class="subsection-label">Beneficiary</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Name</label><input type="text" id="ct-bname" placeholder="Full name"></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" id="ct-bphone" placeholder="+1 234 567 8901"></div>
+        <div class="form-group"><label>Email Address</label><input type="email" id="ct-bemail" placeholder="email@example.com"></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="clearPanel('contact')">Clear</button>
+      <button class="btn btn-primary" id="btn-ct" onclick="saveContact()">Save Contact</button>
+    </div>
+  </div>
+
+  <!-- BANKING -->
+  <div id="panel-banking" class="panel">
+    <h2 class="section-title">Banking Information</h2>
+    <div class="form-grid">
+      <div class="form-group"><label>Account Name *</label><input type="text" id="bk-name" placeholder="Account holder name"></div>
+      <div class="form-group"><label>Account #</label><input type="text" id="bk-acct" placeholder="Account number"></div>
+      <div class="form-group"><label>Bank Name *</label><input type="text" id="bk-bank" placeholder="Bank name"></div>
+      <div class="form-group"><label>Bank Account Name</label><input type="text" id="bk-baname" placeholder="Name on bank account"></div>
+      <div class="form-group"><label>Bank Account Number</label><input type="text" id="bk-banum" placeholder="Bank account number"></div>
+      <div class="form-group"><label>Routing Number</label><input type="text" id="bk-route" placeholder="Routing number"></div>
+      <div class="form-group"><label>IBAN</label><input type="text" id="bk-iban" placeholder="IBAN"></div>
+      <div class="form-group"><label>SWIFT Code / BIC</label><input type="text" id="bk-swift" placeholder="SWIFT/BIC code"></div>
+      <div class="form-group full"><label>Bank Address</label><input type="text" id="bk-addr" placeholder="Bank street address"></div>
+      <div class="form-group full"><label>Address Line 2</label><input type="text" id="bk-addr2" placeholder="Suite, floor, etc."></div>
+      <div class="form-group"><label>City</label><input type="text" id="bk-city" placeholder="City"></div>
+      <div class="form-group"><label>Province / State</label><input type="text" id="bk-prov" placeholder="Province or state"></div>
+      <div class="form-group"><label>Postcode</label><input type="text" id="bk-post" placeholder="Postal code"></div>
+      <div class="form-group"><label>Country</label><input type="text" id="bk-country" placeholder="Country"></div>
+      <div class="form-group"><label>Bank Phone Number</label><input type="tel" id="bk-phone" placeholder="+1 234 567 8901"></div>
+      <div class="form-group"><label>Account Manager Name</label><input type="text" id="bk-mgr" placeholder="Manager name"></div>
+      <div class="form-group"><label>Account Manager Email</label><input type="email" id="bk-mgremail" placeholder="manager@bank.com"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="clearPanel('banking')">Clear</button>
+      <button class="btn btn-primary" id="btn-bk" onclick="saveBanking()">Save Banking</button>
+    </div>
+  </div>
+
+  <!-- INVESTMENT -->
+  <div id="panel-investment" class="panel">
+    <h2 class="section-title">Investment Selection</h2>
+    <div class="form-grid" style="margin-bottom:22px">
+      <div class="form-group"><label>Account #</label><input type="text" id="inv-acct" placeholder="Account number"></div>
+      <div class="form-group"><label>Account Name</label><input type="text" id="inv-name" placeholder="Account holder name"></div>
+    </div>
+    <div id="inv-entries"></div>
+    <button class="add-btn" onclick="addInvCard()">+ Add Investment</button>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="clearPanel('investment')">Clear</button>
+      <button class="btn btn-primary" id="btn-inv" onclick="saveInvestments()">Save Investments</button>
+    </div>
+  </div>
+
+  <!-- RECORDS -->
+  <div id="panel-records" class="panel">
+    <h2 class="section-title">Saved Records</h2>
+    <div class="export-row">
+      <button class="btn btn-gold" onclick="exportExcel()">Export to Excel</button>
+    </div>
+    <div class="records-tabs">
+      <button class="rec-tab active" onclick="switchRecTab('contacts')">Contacts</button>
+      <button class="rec-tab" onclick="switchRecTab('banking')">Banking</button>
+      <button class="rec-tab" onclick="switchRecTab('investments')">Investments</button>
+    </div>
+    <div id="rec-contacts" class="rec-panel"></div>
+    <div id="rec-banking" class="rec-panel" style="display:none"></div>
+    <div id="rec-investments" class="rec-panel" style="display:none"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Dropdown Data ──
+var DD = {
+  classSelections: {
+    'Cash & Cash Equivalent': ['Commercial Paper','Foreign Currency'],
+    'Commodities': ['Gold','Silver'],
+    'Fixed Income': ['Corporate Bonds','Government Bonds','Municipal Bonds'],
+    'Hedge Fund': ['Global Community Advancement','Global Foreign Currency','Global Real Estate','Global Social Justice','Global Venture Capital']
+  },
+  holdingPeriods: {
+    'Short-Term': ['7-Days','30-Days','90-Days','180-Days','270-Days','1-Year'],
+    'Intermediate': ['3-Years','5-Years','7-Years'],
+    'Long-Term': ['10-Years','15-Years']
+  }
+};
+
+// ── IndexedDB ──
+var db;
+function openDB() {
+  return new Promise(function(resolve, reject) {
+    var req = indexedDB.open('NSInvestmentPortal', 1);
+    req.onupgradeneeded = function(e) {
+      var d = e.target.result;
+      if (!d.objectStoreNames.contains('contacts')) d.createObjectStore('contacts', {keyPath:'id',autoIncrement:true});
+      if (!d.objectStoreNames.contains('banking')) d.createObjectStore('banking', {keyPath:'id',autoIncrement:true});
+      if (!d.objectStoreNames.contains('investments')) d.createObjectStore('investments', {keyPath:'id',autoIncrement:true});
+    };
+    req.onsuccess = function(e) { db = e.target.result; resolve(db); };
+    req.onerror = function(e) { reject(e.target.error); };
+  });
+}
+function dbAdd(store, data) {
+  return new Promise(function(resolve, reject) {
+    var tx = db.transaction(store, 'readwrite');
+    var s = tx.objectStore(store);
+    var r = s.add(data);
+    r.onsuccess = function() { resolve(r.result); };
+    r.onerror = function() { reject(r.error); };
+  });
+}
+function dbGetAll(store) {
+  return new Promise(function(resolve, reject) {
+    var tx = db.transaction(store, 'readonly');
+    var s = tx.objectStore(store);
+    var r = s.getAll();
+    r.onsuccess = function() { resolve(r.result); };
+    r.onerror = function() { reject(r.error); };
+  });
+}
+function dbDelete(store, id) {
+  return new Promise(function(resolve, reject) {
+    var tx = db.transaction(store, 'readwrite');
+    var s = tx.objectStore(store);
+    var r = s.delete(id);
+    r.onsuccess = function() { resolve(); };
+    r.onerror = function() { reject(r.error); };
+  });
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', function() {
+  openDB().then(function() {
+    addInvCard();
+    var t = new Date(); var y = t.getFullYear(); var m = String(t.getMonth()+1).padStart(2,'0'); var d = String(t.getDate()).padStart(2,'0');
+    document.getElementById('ct-date').value = y+'-'+m+'-'+d;
+  });
+});
+
+// ── Tabs ──
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(function(t,i) { t.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  var map = {contact:0, banking:1, investment:2, records:3};
+  document.querySelectorAll('.tab')[map[name]].classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  if (name === 'records') loadRecords();
+}
+
+function switchRecTab(name) {
+  document.querySelectorAll('.rec-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.rec-panel').forEach(function(p) { p.style.display = 'none'; });
+  var tabs = document.querySelectorAll('.rec-tab');
+  var map = {contacts:0, banking:1, investments:2};
+  tabs[map[name]].classList.add('active');
+  document.getElementById('rec-'+name).style.display = 'block';
+}
+
+// ── Toast ──
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type||'success') + ' show';
+  setTimeout(function() { t.classList.remove('show'); }, 3500);
+}
+
+// ── Validation ──
+function requireFields(ids) {
+  var ok = true;
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('invalid');
+    if (!el.value.trim()) { el.classList.add('invalid'); ok = false; }
+  });
+  return ok;
+}
+
+// ── Helper ──
+function gv(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+// ── Contact Save ──
+function saveContact() {
+  if (!requireFields(['ct-date','ct-type','ct-holder','ct-email'])) { toast('Please fill in all required fields.','error'); return; }
+  var btn = document.getElementById('btn-ct');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
+  var data = {
+    accountOpeningDate: gv('ct-date'), investorType: gv('ct-type'), companyName: gv('ct-company'),
+    accountHolderName: gv('ct-holder'), phoneNumber: gv('ct-phone'), emailAddress: gv('ct-email'),
+    mailingAddress: gv('ct-addr1'), addressLine2: gv('ct-addr2'), cityTown: gv('ct-city'),
+    provinceState: gv('ct-prov'), postcode: gv('ct-post'), country: gv('ct-country'),
+    secondContactName: gv('ct-c2name'), secondContactPhone: gv('ct-c2phone'), secondContactEmail: gv('ct-c2email'),
+    beneficiaryName: gv('ct-bname'), beneficiaryPhone: gv('ct-bphone'), beneficiaryEmail: gv('ct-bemail'),
+    savedAt: new Date().toISOString()
+  };
+  dbAdd('contacts', data).then(function() {
+    btn.disabled = false; btn.textContent = 'Save Contact';
+    toast('Contact information saved successfully.');
+  }).catch(function(err) {
+    btn.disabled = false; btn.textContent = 'Save Contact';
+    toast('Error saving: ' + err, 'error');
+  });
+}
+
+// ── Banking Save ──
+function saveBanking() {
+  if (!requireFields(['bk-name','bk-bank'])) { toast('Please fill in all required fields.','error'); return; }
+  var btn = document.getElementById('btn-bk');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
+  var data = {
+    accountName: gv('bk-name'), accountNumber: gv('bk-acct'), bankName: gv('bk-bank'),
+    bankAccountName: gv('bk-baname'), bankAccountNumber: gv('bk-banum'), routingNumber: gv('bk-route'),
+    iban: gv('bk-iban'), swiftCode: gv('bk-swift'), bankAddress: gv('bk-addr'),
+    bankAddressLine2: gv('bk-addr2'), bankCity: gv('bk-city'), bankProvinceState: gv('bk-prov'),
+    bankPostcode: gv('bk-post'), bankCountry: gv('bk-country'), bankPhone: gv('bk-phone'),
+    acctManagerName: gv('bk-mgr'), acctManagerEmail: gv('bk-mgremail'),
+    savedAt: new Date().toISOString()
+  };
+  dbAdd('banking', data).then(function() {
+    btn.disabled = false; btn.textContent = 'Save Banking';
+    toast('Banking information saved successfully.');
+  }).catch(function(err) {
+    btn.disabled = false; btn.textContent = 'Save Banking';
+    toast('Error saving: ' + err, 'error');
+  });
+}
+
+// ── Investment Cards ──
+var invCount = 0;
+function addInvCard() {
+  if (invCount >= 5) { toast('Maximum 5 investments allowed.','error'); return; }
+  invCount++;
+  var n = invCount;
+  var c = document.createElement('div'); c.className = 'inv-card'; c.id = 'inv-card-'+n;
+  var hdr = '<div class="inv-header"><span class="inv-num">'+n+'</span>Investment '+n;
+  if (n > 1) hdr += '<button class="remove-btn" onclick="removeInv('+n+')">Remove</button>';
+  hdr += '</div>';
+  c.innerHTML = hdr +
+    '<div class="form-grid">' +
+    '<div class="form-group"><label>Asset Class</label><select id="inv-ac-'+n+'" onchange="onAC('+n+')"><option value="">-- Select Asset Class --</option><option>Cash &amp; Cash Equivalent</option><option>Commodities</option><option>Fixed Income</option><option>Hedge Fund</option></select></div>' +
+    '<div class="form-group"><label>Class Selection</label><select id="inv-cs-'+n+'" disabled><option value="">-- Select Asset Class first --</option></select></div>' +
+    '<div class="form-group"><label>Duration</label><select id="inv-dur-'+n+'" onchange="onDur('+n+')"><option value="">-- Select Duration --</option><option>Short-Term</option><option>Intermediate</option><option>Long-Term</option></select></div>' +
+    '<div class="form-group"><label>Holding Period</label><select id="inv-hp-'+n+'" disabled><option value="">-- Select Duration first --</option></select></div>' +
+    '<div class="form-group"><label>Committed Capital</label><input type="text" id="inv-cap-'+n+'" placeholder="$0.00"></div>' +
+    '<div class="form-group"><label>Deposit Interval</label><input type="text" id="inv-int-'+n+'" placeholder="e.g. Monthly"></div>' +
+    '<div class="form-group"><label>Initial Investment</label><input type="text" id="inv-init-'+n+'" placeholder="$0.00"></div>' +
+    '<div class="form-group"><label>Capital Call Date</label><input type="date" id="inv-ccd-'+n+'"></div>' +
+    '<div class="form-group"><label>Funding Date</label><input type="date" id="inv-fd-'+n+'"></div>' +
+    '<div class="form-group"><label>Maturity Date</label><input type="date" id="inv-md-'+n+'"></div>' +
+    '</div>';
+  document.getElementById('inv-entries').appendChild(c);
+}
+
+function removeInv(n) {
+  var card = document.getElementById('inv-card-'+n);
+  if (card) card.remove();
+}
+
+function onAC(n) {
+  var ac = document.getElementById('inv-ac-'+n).value;
+  var sel = document.getElementById('inv-cs-'+n);
+  sel.innerHTML = '';
+  if (!ac || !DD.classSelections[ac]) {
+    sel.innerHTML = '<option value="">-- Select Asset Class first --</option>';
+    sel.disabled = true; return;
+  }
+  sel.disabled = false;
+  sel.innerHTML = '<option value="">-- Select Class --</option>';
+  DD.classSelections[ac].forEach(function(v) {
+    sel.innerHTML += '<option value="'+v+'">'+v+'</option>';
+  });
+}
+
+function onDur(n) {
+  var dur = document.getElementById('inv-dur-'+n).value;
+  var sel = document.getElementById('inv-hp-'+n);
+  sel.innerHTML = '';
+  if (!dur || !DD.holdingPeriods[dur]) {
+    sel.innerHTML = '<option value="">-- Select Duration first --</option>';
+    sel.disabled = true; return;
+  }
+  sel.disabled = false;
+  sel.innerHTML = '<option value="">-- Select Holding Period --</option>';
+  DD.holdingPeriods[dur].forEach(function(v) {
+    sel.innerHTML += '<option value="'+v+'">'+v+'</option>';
+  });
+}
+
+// ── Investment Save ──
+function saveInvestments() {
+  var cards = document.querySelectorAll('.inv-card');
+  if (!cards.length) { toast('Add at least one investment.','error'); return; }
+  var btn = document.getElementById('btn-inv');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Saving...';
+  var acct = gv('inv-acct');
+  var name = gv('inv-name');
+  var promises = [];
+  cards.forEach(function(card) {
+    var n = card.id.replace('inv-card-','');
+    var data = {
+      accountNumber: acct, accountName: name,
+      assetClass: gv('inv-ac-'+n), classSelection: gv('inv-cs-'+n),
+      duration: gv('inv-dur-'+n), holdingPeriod: gv('inv-hp-'+n),
+      committedCapital: gv('inv-cap-'+n), depositInterval: gv('inv-int-'+n),
+      initialInvestment: gv('inv-init-'+n), capitalCallDate: gv('inv-ccd-'+n),
+      fundingDate: gv('inv-fd-'+n), maturityDate: gv('inv-md-'+n),
+      savedAt: new Date().toISOString()
+    };
+    promises.push(dbAdd('investments', data));
+  });
+  Promise.all(promises).then(function() {
+    btn.disabled = false; btn.textContent = 'Save Investments';
+    toast(promises.length + ' investment(s) saved successfully.');
+  }).catch(function(err) {
+    btn.disabled = false; btn.textContent = 'Save Investments';
+    toast('Error saving: ' + err, 'error');
+  });
+}
+
+// ── Clear ──
+function clearPanel(name) {
+  var p = document.getElementById('panel-'+name);
+  p.querySelectorAll('input').forEach(function(i) { i.value = ''; i.classList.remove('invalid'); });
+  p.querySelectorAll('select').forEach(function(s) { s.selectedIndex = 0; s.classList.remove('invalid'); });
+  if (name === 'investment') {
+    document.getElementById('inv-entries').innerHTML = '';
+    invCount = 0;
+    addInvCard();
+  }
+  if (name === 'contact') {
+    var t = new Date(); var y = t.getFullYear(); var m = String(t.getMonth()+1).padStart(2,'0'); var d = String(t.getDate()).padStart(2,'0');
+    document.getElementById('ct-date').value = y+'-'+m+'-'+d;
+  }
+}
+
+// ── Records ──
+function loadRecords() {
+  Promise.all([dbGetAll('contacts'), dbGetAll('banking'), dbGetAll('investments')]).then(function(results) {
+    renderContactsTable(results[0]);
+    renderBankingTable(results[1]);
+    renderInvestmentsTable(results[2]);
+  });
+}
+
+function renderContactsTable(rows) {
+  var el = document.getElementById('rec-contacts');
+  if (!rows.length) { el.innerHTML = '<div class="empty-state">No contact records yet. Use the Contact Info tab to add one.</div>'; return; }
+  var cols = ['Account Opening Date','Investor Type','Company Name','Account Holder Name','Phone Number','Email Address','Mailing Address','Address Line 2','City/Town','Province/State','Postcode','Country','Second Contact Name','Second Contact Phone','Second Contact Email','Beneficiary Name','Beneficiary Phone','Beneficiary Email'];
+  var keys = ['accountOpeningDate','investorType','companyName','accountHolderName','phoneNumber','emailAddress','mailingAddress','addressLine2','cityTown','provinceState','postcode','country','secondContactName','secondContactPhone','secondContactEmail','beneficiaryName','beneficiaryPhone','beneficiaryEmail'];
+  el.innerHTML = '<div class="record-count">'+rows.length+' record(s)</div>' + buildTable(rows, cols, keys, 'contacts');
+}
+
+function renderBankingTable(rows) {
+  var el = document.getElementById('rec-banking');
+  if (!rows.length) { el.innerHTML = '<div class="empty-state">No banking records yet. Use the Banking Info tab to add one.</div>'; return; }
+  var cols = ['Account Name','Account #','Bank Name','Bank Account Name','Bank Account Number','Routing Number','IBAN','SWIFT Code/BIC','Bank Address','Address Line 2','City','Province/State','Postcode','Country','Bank Phone Number','Account Manager','Email Address'];
+  var keys = ['accountName','accountNumber','bankName','bankAccountName','bankAccountNumber','routingNumber','iban','swiftCode','bankAddress','bankAddressLine2','bankCity','bankProvinceState','bankPostcode','bankCountry','bankPhone','acctManagerName','acctManagerEmail'];
+  el.innerHTML = '<div class="record-count">'+rows.length+' record(s)</div>' + buildTable(rows, cols, keys, 'banking');
+}
+
+function renderInvestmentsTable(rows) {
+  var el = document.getElementById('rec-investments');
+  if (!rows.length) { el.innerHTML = '<div class="empty-state">No investment records yet. Use the Investment Selection tab to add one.</div>'; return; }
+  var cols = ['Account #','Account Name','Asset Class','Class Selection','Duration','Holding Period','Committed Capital','Deposit Interval','Initial Investment','Capital Call Date','Funding Date','Maturity Date'];
+  var keys = ['accountNumber','accountName','assetClass','classSelection','duration','holdingPeriod','committedCapital','depositInterval','initialInvestment','capitalCallDate','fundingDate','maturityDate'];
+  el.innerHTML = '<div class="record-count">'+rows.length+' record(s)</div>' + buildTable(rows, cols, keys, 'investments');
+}
+
+function buildTable(rows, cols, keys, store) {
+  var h = '<div class="tbl-wrap"><table><thead><tr><th></th>';
+  cols.forEach(function(c) { h += '<th>'+c+'</th>'; });
+  h += '</tr></thead><tbody>';
+  rows.forEach(function(r) {
+    h += '<tr><td><button class="del-row" onclick="deleteRec(\''+store+'\','+r.id+')" title="Delete">&times;</button></td>';
+    keys.forEach(function(k) { h += '<td>'+(r[k]||'')+'</td>'; });
+    h += '</tr>';
+  });
+  h += '</tbody></table></div>';
+  return h;
+}
+
+function deleteRec(store, id) {
+  if (!confirm('Delete this record?')) return;
+  dbDelete(store, id).then(function() {
+    toast('Record deleted.');
+    loadRecords();
+  });
+}
+
+// ── Excel Export ──
+function exportExcel() {
+  Promise.all([dbGetAll('contacts'), dbGetAll('banking'), dbGetAll('investments')]).then(function(results) {
+    if (!results[0].length && !results[1].length && !results[2].length) {
+      toast('No records to export.','info'); return;
+    }
+    var wb = XLSX.utils.book_new();
+
+    // Contact DB
+    var ctHeaders = ['Account Opening Date','Investor Type','Company Name','Account Holder Name','Phone Number','Email Address','Mailing Address','Address Line 2','City/Town','Province/State','Postcode','Country','Second Contact Name','Second Contact Phone Number','Second Contact Email Address','Beneficiary Name','Beneficiary Phone Number','Beneficiary Email Address'];
+    var ctKeys = ['accountOpeningDate','investorType','companyName','accountHolderName','phoneNumber','emailAddress','mailingAddress','addressLine2','cityTown','provinceState','postcode','country','secondContactName','secondContactPhone','secondContactEmail','beneficiaryName','beneficiaryPhone','beneficiaryEmail'];
+    var ctData = [ctHeaders];
+    results[0].forEach(function(r) { var row = []; ctKeys.forEach(function(k){ row.push(r[k]||''); }); ctData.push(row); });
+    var ws1 = XLSX.utils.aoa_to_sheet(ctData);
+    XLSX.utils.book_append_sheet(wb, ws1, 'Contact DB');
+
+    // Banking DB
+    var bkHeaders = ['Account Name','Account #','Bank Name','Bank Account Name','Bank Account Number','Routing Number','IBAN','SWIFT Code/BIC','Bank Address','Address Line 2','City','Province/State','Postcode','Country','Bank Phone Number','Account Manager','Email Address'];
+    var bkKeys = ['accountName','accountNumber','bankName','bankAccountName','bankAccountNumber','routingNumber','iban','swiftCode','bankAddress','bankAddressLine2','bankCity','bankProvinceState','bankPostcode','bankCountry','bankPhone','acctManagerName','acctManagerEmail'];
+    var bkData = [bkHeaders];
+    results[1].forEach(function(r) { var row = []; bkKeys.forEach(function(k){ row.push(r[k]||''); }); bkData.push(row); });
+    var ws2 = XLSX.utils.aoa_to_sheet(bkData);
+    XLSX.utils.book_append_sheet(wb, ws2, 'Banking DB');
+
+    // LP Selection
+    var invHeaders = ['Account #','Account Name','Asset Class','Class Selection','Duration','Holding Period','Committed Capital','Deposit Interval','Initial Investment','Capital Call Date','Funding Date','Maturity Date'];
+    var invKeys = ['accountNumber','accountName','assetClass','classSelection','duration','holdingPeriod','committedCapital','depositInterval','initialInvestment','capitalCallDate','fundingDate','maturityDate'];
+    var invData = [invHeaders];
+    results[2].forEach(function(r) { var row = []; invKeys.forEach(function(k){ row.push(r[k]||''); }); invData.push(row); });
+    var ws3 = XLSX.utils.aoa_to_sheet(invData);
+    XLSX.utils.book_append_sheet(wb, ws3, 'LP Selection');
+
+    XLSX.writeFile(wb, 'NS_Investment_Data.xlsx');
+    toast('Excel file downloaded successfully.');
+  });
+}
+</script>
+</body>
+</html>
