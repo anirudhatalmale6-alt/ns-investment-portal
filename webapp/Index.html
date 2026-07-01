@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      line-height: 1.6;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 100%);
+      color: #fff;
+      padding: 30px 20px;
+      text-align: center;
+      border-bottom: 3px solid #c9a84c;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 300;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: #c9a84c;
+      letter-spacing: 1px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+      border-bottom: 2px solid #ddd;
+      background: #fff;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      border: none;
+      background: transparent;
+      transition: all 0.3s ease;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      position: relative;
+    }
+
+    .tab:hover { color: #1a2a4a; background: #f8f9fa; }
+
+    .tab.active {
+      color: #1a2a4a;
+      background: #fff;
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #c9a84c;
+    }
+
+    .form-panel {
+      display: none;
+      background: #fff;
+      padding: 30px;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .form-panel.active { display: block; }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a2a4a;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f0f2f5;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input,
+    .form-group select {
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #333;
+      background: #fafbfc;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #c9a84c;
+      box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
+      background: #fff;
+    }
+
+    .form-group select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%23666'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+
+    .form-group input::placeholder {
+      color: #aaa;
+    }
+
+    .subsection {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .subsection-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #888;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .investment-card {
+      background: #fafbfc;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .investment-card-header {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a2a4a;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .investment-card-header .num {
+      background: #c9a84c;
+      color: #fff;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 12px 32px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1a2a4a, #0a1628);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 4px 12px rgba(26, 42, 74, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #f0f2f5;
+      color: #666;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e6ea;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 14px 24px;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 500;
+      font-size: 14px;
+      z-index: 1000;
+      transform: translateX(120%);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+
+    .toast.show { transform: translateX(0); }
+    .toast.success { background: #2d8a4e; }
+    .toast.error { background: #c0392b; }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.7s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .add-investment-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      background: transparent;
+      color: #888;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .add-investment-btn:hover {
+      border-color: #c9a84c;
+      color: #c9a84c;
+    }
+
+    .remove-inv-btn {
+      background: none;
+      border: none;
+      color: #c0392b;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-left: auto;
+    }
+
+    .remove-inv-btn:hover {
+      background: #ffeaea;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .tabs { flex-direction: column; }
+      .tab { border-bottom: 1px solid #eee; }
+      .form-panel { padding: 20px 16px; }
+      .header h1 { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>NS Investment Portal</h1>
+  <p>Sustainability for the people and the planet</p>
+</div>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('contact')">Contact Info</button>
+    <button class="tab" onclick="switchTab('banking')">Banking Info</button>
+    <button class="tab" onclick="switchTab('investment')">Investment Selection</button>
+  </div>
+
+  <!-- CONTACT INFORMATION -->
+  <div id="panel-contact" class="form-panel active">
+    <h2 class="section-title">Contact Information</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Account Opening Date</label>
+        <input type="date" id="ct-openingDate">
+      </div>
+      <div class="form-group">
+        <label>Investor Type</label>
+        <select id="ct-investorType">
+          <option value="">-- Select --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Company Name</label>
+        <input type="text" id="ct-companyName" placeholder="Enter company name">
+      </div>
+      <div class="form-group">
+        <label>Account Holder Name</label>
+        <input type="text" id="ct-holderName" placeholder="Full name">
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="ct-phone" placeholder="+1 234 567 8901">
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="ct-email" placeholder="email@example.com">
+      </div>
+      <div class="form-group full-width">
+        <label>Mailing Address</label>
+        <input type="text" id="ct-address1" placeholder="Street address">
+      </div>
+      <div class="form-group full-width">
+        <label>Address Line 2</label>
+        <input type="text" id="ct-address2" placeholder="Apt, suite, unit, etc.">
+      </div>
+      <div class="form-group">
+        <label>City / Town</label>
+        <input type="text" id="ct-city" placeholder="City">
+      </div>
+      <div class="form-group">
+        <label>Province / State</label>
+        <input type="text" id="ct-province" placeholder="Province or state">
+      </div>
+      <div class="form-group">
+        <label>Postcode</label>
+        <input type="text" id="ct-postcode" placeholder="Postal code">
+      </div>
+      <div class="form-group">
+        <label>Country</label>
+        <input type="text" id="ct-country" placeholder="Country">
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">Second Contact</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="ct-contact2Name" placeholder="Full name">
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="ct-contact2Phone" placeholder="+1 234 567 8901">
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="ct-contact2Email" placeholder="email@example.com">
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">Beneficiary</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="ct-beneficiaryName" placeholder="Full name">
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="ct-beneficiaryPhone" placeholder="+1 234 567 8901">
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="ct-beneficiaryEmail" placeholder="email@example.com">
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="clearForm('contact')">Clear</button>
+      <button class="btn btn-primary" id="btn-save-contact" onclick="saveContact()">Save Contact</button>
+    </div>
+  </div>
+
+  <!-- BANKING INFORMATION -->
+  <div id="panel-banking" class="form-panel">
+    <h2 class="section-title">Banking Information</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Account Name</label>
+        <input type="text" id="bk-accountName" placeholder="Account holder name">
+      </div>
+      <div class="form-group">
+        <label>Account #</label>
+        <input type="text" id="bk-accountNumber" placeholder="Account number">
+      </div>
+      <div class="form-group">
+        <label>Bank Name</label>
+        <input type="text" id="bk-bankName" placeholder="Bank name">
+      </div>
+      <div class="form-group">
+        <label>Bank Account Name</label>
+        <input type="text" id="bk-bankAccountName" placeholder="Name on bank account">
+      </div>
+      <div class="form-group">
+        <label>Bank Account Number</label>
+        <input type="text" id="bk-bankAccountNumber" placeholder="Bank account number">
+      </div>
+      <div class="form-group">
+        <label>Routing Number</label>
+        <input type="text" id="bk-routingNumber" placeholder="Routing number">
+      </div>
+      <div class="form-group">
+        <label>IBAN</label>
+        <input type="text" id="bk-iban" placeholder="IBAN">
+      </div>
+      <div class="form-group">
+        <label>SWIFT Code / BIC</label>
+        <input type="text" id="bk-swiftCode" placeholder="SWIFT/BIC code">
+      </div>
+      <div class="form-group full-width">
+        <label>Bank Address</label>
+        <input type="text" id="bk-bankAddress" placeholder="Bank street address">
+      </div>
+      <div class="form-group full-width">
+        <label>Address Line 2</label>
+        <input type="text" id="bk-bankAddress2" placeholder="Suite, floor, etc.">
+      </div>
+      <div class="form-group">
+        <label>City</label>
+        <input type="text" id="bk-bankCity" placeholder="City">
+      </div>
+      <div class="form-group">
+        <label>Province / State</label>
+        <input type="text" id="bk-bankProvince" placeholder="Province or state">
+      </div>
+      <div class="form-group">
+        <label>Postcode</label>
+        <input type="text" id="bk-bankPostcode" placeholder="Postal code">
+      </div>
+      <div class="form-group">
+        <label>Country</label>
+        <input type="text" id="bk-bankCountry" placeholder="Country">
+      </div>
+      <div class="form-group">
+        <label>Bank Phone Number</label>
+        <input type="tel" id="bk-bankPhone" placeholder="+1 234 567 8901">
+      </div>
+      <div class="form-group">
+        <label>Account Manager Name</label>
+        <input type="text" id="bk-managerName" placeholder="Manager name">
+      </div>
+      <div class="form-group">
+        <label>Account Manager Email</label>
+        <input type="email" id="bk-managerEmail" placeholder="manager@bank.com">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="clearForm('banking')">Clear</button>
+      <button class="btn btn-primary" id="btn-save-banking" onclick="saveBanking()">Save Banking</button>
+    </div>
+  </div>
+
+  <!-- INVESTMENT SELECTION -->
+  <div id="panel-investment" class="form-panel">
+    <h2 class="section-title">Investment Selection</h2>
+
+    <div class="form-grid" style="margin-bottom:20px;">
+      <div class="form-group">
+        <label>Account #</label>
+        <input type="text" id="inv-accountNumber" placeholder="Account number">
+      </div>
+      <div class="form-group">
+        <label>Account Name</label>
+        <input type="text" id="inv-accountName" placeholder="Account holder name">
+      </div>
+    </div>
+
+    <div id="investment-entries"></div>
+
+    <button class="add-investment-btn" onclick="addInvestmentEntry()">
+      + Add Investment
+    </button>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="clearForm('investment')">Clear</button>
+      <button class="btn btn-primary" id="btn-save-investment" onclick="saveInvestments()">Save Investments</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  var dropdownData = null;
+  var investmentCount = 0;
+
+  // Load dropdown data on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    google.script.run
+      .withSuccessHandler(function(json) {
+        dropdownData = JSON.parse(json);
+        populateInvestorTypes();
+        addInvestmentEntry();
+      })
+      .withFailureHandler(function(err) {
+        showToast('Failed to load dropdown data: ' + err.message, 'error');
+      })
+      .getDropdownData();
+
+    // Set today's date as default
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById('ct-openingDate').value = today;
+  });
+
+  function populateInvestorTypes() {
+    var sel = document.getElementById('ct-investorType');
+    dropdownData.investorTypes.forEach(function(t) {
+      var opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t;
+      sel.appendChild(opt);
+    });
+  }
+
+  // Tab switching
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.form-panel').forEach(function(p) { p.classList.remove('active'); });
+
+    var tabs = document.querySelectorAll('.tab');
+    var map = { contact: 0, banking: 1, investment: 2 };
+    tabs[map[name]].classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+  }
+
+  // Investment entry management
+  function addInvestmentEntry() {
+    if (investmentCount >= 5) {
+      showToast('Maximum 5 investments allowed.', 'error');
+      return;
+    }
+    investmentCount++;
+    var idx = investmentCount;
+    var container = document.getElementById('investment-entries');
+
+    var card = document.createElement('div');
+    card.className = 'investment-card';
+    card.id = 'inv-card-' + idx;
+
+    var headerHtml = '<div class="investment-card-header">' +
+      '<span class="num">' + idx + '</span> Investment ' + idx;
+    if (idx > 1) {
+      headerHtml += '<button class="remove-inv-btn" onclick="removeInvestment(' + idx + ')">Remove</button>';
+    }
+    headerHtml += '</div>';
+
+    card.innerHTML = headerHtml +
+      '<div class="form-grid">' +
+        '<div class="form-group">' +
+          '<label>Asset Class</label>' +
+          '<select id="inv-asset-' + idx + '" onchange="onAssetClassChange(' + idx + ')">' +
+            '<option value="">-- Select Asset Class --</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Class Selection</label>' +
+          '<select id="inv-class-' + idx + '" disabled>' +
+            '<option value="">-- Select Asset Class first --</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Duration</label>' +
+          '<select id="inv-duration-' + idx + '" onchange="onDurationChange(' + idx + ')">' +
+            '<option value="">-- Select Duration --</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Holding Period</label>' +
+          '<select id="inv-holding-' + idx + '" disabled>' +
+            '<option value="">-- Select Duration first --</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Committed Capital</label>' +
+          '<input type="text" id="inv-capital-' + idx + '" placeholder="$0.00">' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Deposit Interval</label>' +
+          '<input type="text" id="inv-interval-' + idx + '" placeholder="e.g. Monthly">' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Initial Investment</label>' +
+          '<input type="text" id="inv-initial-' + idx + '" placeholder="$0.00">' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Capital Call Date</label>' +
+          '<input type="date" id="inv-callDate-' + idx + '">' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Funding Date</label>' +
+          '<input type="date" id="inv-fundDate-' + idx + '">' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Maturity Date</label>' +
+          '<input type="date" id="inv-matDate-' + idx + '">' +
+        '</div>' +
+      '</div>';
+
+    container.appendChild(card);
+
+    // Populate dropdowns
+    if (dropdownData) {
+      var assetSel = document.getElementById('inv-asset-' + idx);
+      dropdownData.assetClasses.forEach(function(ac) {
+        var opt = document.createElement('option');
+        opt.value = ac;
+        opt.textContent = ac;
+        assetSel.appendChild(opt);
+      });
+
+      var durSel = document.getElementById('inv-duration-' + idx);
+      dropdownData.durations.forEach(function(d) {
+        var opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        durSel.appendChild(opt);
+      });
+    }
+  }
+
+  function removeInvestment(idx) {
+    var card = document.getElementById('inv-card-' + idx);
+    if (card) card.remove();
+  }
+
+  // Dependent dropdown handlers
+  function onAssetClassChange(idx) {
+    var assetClass = document.getElementById('inv-asset-' + idx).value;
+    var classSel = document.getElementById('inv-class-' + idx);
+
+    classSel.innerHTML = '';
+
+    if (!assetClass || !dropdownData.classSelections[assetClass]) {
+      classSel.innerHTML = '<option value="">-- Select Asset Class first --</option>';
+      classSel.disabled = true;
+      return;
+    }
+
+    classSel.disabled = false;
+    var defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.textContent = '-- Select Class --';
+    classSel.appendChild(defaultOpt);
+
+    dropdownData.classSelections[assetClass].forEach(function(cs) {
+      var opt = document.createElement('option');
+      opt.value = cs;
+      opt.textContent = cs;
+      classSel.appendChild(opt);
+    });
+  }
+
+  function onDurationChange(idx) {
+    var duration = document.getElementById('inv-duration-' + idx).value;
+    var holdSel = document.getElementById('inv-holding-' + idx);
+
+    holdSel.innerHTML = '';
+
+    if (!duration || !dropdownData.holdingPeriods[duration]) {
+      holdSel.innerHTML = '<option value="">-- Select Duration first --</option>';
+      holdSel.disabled = true;
+      return;
+    }
+
+    holdSel.disabled = false;
+    var defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.textContent = '-- Select Holding Period --';
+    holdSel.appendChild(defaultOpt);
+
+    dropdownData.holdingPeriods[duration].forEach(function(hp) {
+      var opt = document.createElement('option');
+      opt.value = hp;
+      opt.textContent = hp;
+      holdSel.appendChild(opt);
+    });
+  }
+
+  // Save functions
+  function saveContact() {
+    var btn = document.getElementById('btn-save-contact');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner"></span>Saving...';
+
+    var formData = {
+      accountOpeningDate: document.getElementById('ct-openingDate').value,
+      investorType: document.getElementById('ct-investorType').value,
+      companyName: document.getElementById('ct-companyName').value,
+      accountHolderName: document.getElementById('ct-holderName').value,
+      phoneNumber: document.getElementById('ct-phone').value,
+      emailAddress: document.getElementById('ct-email').value,
+      mailingAddress: document.getElementById('ct-address1').value,
+      addressLine2: document.getElementById('ct-address2').value,
+      cityTown: document.getElementById('ct-city').value,
+      provinceState: document.getElementById('ct-province').value,
+      postcode: document.getElementById('ct-postcode').value,
+      country: document.getElementById('ct-country').value,
+      secondContactName: document.getElementById('ct-contact2Name').value,
+      secondContactPhone: document.getElementById('ct-contact2Phone').value,
+      secondContactEmail: document.getElementById('ct-contact2Email').value,
+      beneficiaryName: document.getElementById('ct-beneficiaryName').value,
+      beneficiaryPhone: document.getElementById('ct-beneficiaryPhone').value,
+      beneficiaryEmail: document.getElementById('ct-beneficiaryEmail').value
+    };
+
+    google.script.run
+      .withSuccessHandler(function(msg) {
+        btn.disabled = false;
+        btn.innerHTML = 'Save Contact';
+        showToast(msg, 'success');
+      })
+      .withFailureHandler(function(err) {
+        btn.disabled = false;
+        btn.innerHTML = 'Save Contact';
+        showToast('Error: ' + err.message, 'error');
+      })
+      .submitContactForm(formData);
+  }
+
+  function saveBanking() {
+    var btn = document.getElementById('btn-save-banking');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner"></span>Saving...';
+
+    var formData = {
+      accountName: document.getElementById('bk-accountName').value,
+      accountNumber: document.getElementById('bk-accountNumber').value,
+      bankName: document.getElementById('bk-bankName').value,
+      bankAccountName: document.getElementById('bk-bankAccountName').value,
+      bankAccountNumber: document.getElementById('bk-bankAccountNumber').value,
+      routingNumber: document.getElementById('bk-routingNumber').value,
+      iban: document.getElementById('bk-iban').value,
+      swiftCode: document.getElementById('bk-swiftCode').value,
+      bankAddress: document.getElementById('bk-bankAddress').value,
+      bankAddressLine2: document.getElementById('bk-bankAddress2').value,
+      bankCity: document.getElementById('bk-bankCity').value,
+      bankProvinceState: document.getElementById('bk-bankProvince').value,
+      bankPostcode: document.getElementById('bk-bankPostcode').value,
+      bankCountry: document.getElementById('bk-bankCountry').value,
+      bankPhone: document.getElementById('bk-bankPhone').value,
+      acctManagerName: document.getElementById('bk-managerName').value,
+      acctManagerEmail: document.getElementById('bk-managerEmail').value
+    };
+
+    google.script.run
+      .withSuccessHandler(function(msg) {
+        btn.disabled = false;
+        btn.innerHTML = 'Save Banking';
+        showToast(msg, 'success');
+      })
+      .withFailureHandler(function(err) {
+        btn.disabled = false;
+        btn.innerHTML = 'Save Banking';
+        showToast('Error: ' + err.message, 'error');
+      })
+      .submitBankingForm(formData);
+  }
+
+  function saveInvestments() {
+    var btn = document.getElementById('btn-save-investment');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner"></span>Saving...';
+
+    var acctNum = document.getElementById('inv-accountNumber').value;
+    var acctName = document.getElementById('inv-accountName').value;
+
+    var cards = document.querySelectorAll('.investment-card');
+    var saved = 0;
+    var total = cards.length;
+    var errors = 0;
+
+    if (total === 0) {
+      btn.disabled = false;
+      btn.innerHTML = 'Save Investments';
+      showToast('No investments to save.', 'error');
+      return;
+    }
+
+    cards.forEach(function(card) {
+      var id = card.id.replace('inv-card-', '');
+
+      var formData = {
+        accountNumber: acctNum,
+        accountName: acctName,
+        assetClass: getValue('inv-asset-' + id),
+        classSelection: getValue('inv-class-' + id),
+        duration: getValue('inv-duration-' + id),
+        holdingPeriod: getValue('inv-holding-' + id),
+        committedCapital: getValue('inv-capital-' + id),
+        depositInterval: getValue('inv-interval-' + id),
+        initialInvestment: getValue('inv-initial-' + id),
+        capitalCallDate: getValue('inv-callDate-' + id),
+        fundingDate: getValue('inv-fundDate-' + id),
+        maturityDate: getValue('inv-matDate-' + id)
+      };
+
+      google.script.run
+        .withSuccessHandler(function() {
+          saved++;
+          if (saved + errors === total) {
+            btn.disabled = false;
+            btn.innerHTML = 'Save Investments';
+            if (errors === 0) {
+              showToast(saved + ' investment(s) saved successfully.', 'success');
+            } else {
+              showToast(saved + ' saved, ' + errors + ' failed.', 'error');
+            }
+          }
+        })
+        .withFailureHandler(function() {
+          errors++;
+          if (saved + errors === total) {
+            btn.disabled = false;
+            btn.innerHTML = 'Save Investments';
+            showToast(saved + ' saved, ' + errors + ' failed.', 'error');
+          }
+        })
+        .submitInvestmentForm(formData);
+    });
+  }
+
+  function getValue(id) {
+    var el = document.getElementById(id);
+    return el ? el.value : '';
+  }
+
+  // Clear form
+  function clearForm(panel) {
+    var container = document.getElementById('panel-' + panel);
+    container.querySelectorAll('input').forEach(function(inp) { inp.value = ''; });
+    container.querySelectorAll('select').forEach(function(sel) { sel.selectedIndex = 0; });
+
+    if (panel === 'investment') {
+      document.getElementById('investment-entries').innerHTML = '';
+      investmentCount = 0;
+      addInvestmentEntry();
+    }
+
+    if (panel === 'contact') {
+      var today = new Date().toISOString().split('T')[0];
+      document.getElementById('ct-openingDate').value = today;
+    }
+  }
+
+  // Toast notification
+  function showToast(message, type) {
+    var toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + type + ' show';
+    setTimeout(function() {
+      toast.classList.remove('show');
+    }, 4000);
+  }
+</script>
+
+</body>
+</html>

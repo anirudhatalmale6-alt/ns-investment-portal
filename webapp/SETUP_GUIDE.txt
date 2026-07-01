@@ -1,0 +1,86 @@
+NS INVESTMENT PORTAL - SETUP GUIDE
+====================================
+
+This guide walks you through setting up the web form with your Google Sheet.
+It takes about 5 minutes and requires no coding knowledge.
+
+
+STEP 1: IMPORT YOUR SPREADSHEET TO GOOGLE SHEETS
+-------------------------------------------------
+1. Go to https://sheets.google.com
+2. Click the "+" button to create a new blank spreadsheet
+3. Go to File > Import
+4. Click "Upload" and select your "Working Copy.xlsx" file
+5. Choose "Replace spreadsheet" and click "Import data"
+6. Verify all 8 sheets are there (Login, Contact, Contact DB, etc.)
+
+
+STEP 2: OPEN THE SCRIPT EDITOR
+-------------------------------
+1. In your Google Sheet, go to Extensions > Apps Script
+2. This opens the Apps Script editor in a new tab
+3. You'll see a file called "Code.gs" with a default function - delete everything in it
+
+
+STEP 3: ADD THE CODE
+---------------------
+1. Delete any existing code in Code.gs
+2. Copy the ENTIRE contents of the "Code.gs" file I provided and paste it in
+
+3. Now create the HTML file:
+   - Click the "+" button next to "Files" in the left panel
+   - Select "HTML"
+   - Name it "Index" (it will become Index.html)
+   - Delete any default content
+   - Copy the ENTIRE contents of "Index.html" I provided and paste it in
+
+4. Click the Save button (disk icon) or press Ctrl+S
+
+
+STEP 4: DEPLOY AS WEB APP
+--------------------------
+1. Click "Deploy" > "New deployment"
+2. Click the gear icon next to "Select type" and choose "Web app"
+3. Fill in:
+   - Description: "NS Investment Portal"
+   - Execute as: "Me"
+   - Who has access: "Anyone" (or "Anyone with a link" if you want it semi-private)
+4. Click "Deploy"
+5. Click "Authorize access" and follow the prompts:
+   - Choose your Google account
+   - If you see "This app isn't verified", click "Advanced" then "Go to NS Investment Portal (unsafe)"
+   - Click "Allow"
+6. You'll get a URL - this is your web form! Copy it and open it in a browser.
+
+
+STEP 5: TEST IT
+----------------
+1. Open the web form URL in your browser
+2. Fill in some test contact data and click "Save Contact"
+3. Go back to your Google Sheet and check the "Contact DB" sheet - your data should be there
+4. Try the Investment tab - select an Asset Class and watch the Class Selection update
+5. Try Banking tab too
+
+
+SHARING THE FORM
+-----------------
+Share the web form URL with anyone you want to fill in data.
+They don't need access to the Google Sheet - just the form URL.
+All submissions go directly into your spreadsheet.
+
+
+UPDATING DROPDOWN OPTIONS
+---------------------------
+To add or change dropdown options (asset classes, durations, etc.):
+1. Open your Google Sheet
+2. Go to the "Investment Workspace" sheet
+3. Edit the tables there (add new rows, change values)
+4. The web form automatically picks up the changes - no code edits needed!
+
+
+TROUBLESHOOTING
+----------------
+- If you see "Script function not found": Make sure Code.gs is saved and the function names match exactly
+- If dropdowns are empty: Check that the "Investment Workspace" sheet exists and has data in the correct positions
+- If data isn't saving: Check that "Contact DB", "Banking DB", and "LP Selection" sheets exist with their header rows
+- If you need to update the code: Go to Extensions > Apps Script, make changes, then Deploy > Manage deployments > Edit > Version: New version > Deploy
